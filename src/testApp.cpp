@@ -1,25 +1,19 @@
 #include "testApp.h"
 
-
-
 //--------------------------------------------------------------
 void testApp::setup() {
 	ofSetLogLevel(OF_LOG_VERBOSE);
 	ofBackground(0);
-	//ofSetVerticalSync(true);
-	hasMouse = false;
-	previousX = ofGetWidth()/2;
-	previousY = ofGetHeight()/2;
-	currentX = 0;
-	currentY = 0;
+	ofSetVerticalSync(true);
+	
 	// billboard particles
 	for (int i=0; i<NUM_BILLBOARDS; i++) {
-		ofVec3f point;
-		
-		
-		point.x = ofRandomWidth();
-		point.y = ofRandomHeight();
-		pos.push_back(point);
+		#ifdef TARGET_OPENGLES
+			pos.push_back(ofVec3f(ofRandomWidth(), ofRandomHeight(), 0));
+		#else
+			pos[i].x = ofRandomWidth();
+			pos[i].y = ofRandomHeight();
+		#endif
 		vel[i].x = ofRandomf();
 		vel[i].y = ofRandomf();
 		home[i] = pos[i];
@@ -27,45 +21,35 @@ void testApp::setup() {
 		rotations[i] = ofRandom(0, 360);
 	}
 	
-	mesh.setUsage(GL_DYNAMIC_DRAW);
-	mesh.addVertices(pos);
-	shader.load("BillboardRotation.vert", "BillboardRotation.frag", "");
+	// set the vertex data
+	
+	#ifdef TARGET_OPENGLES
+		shader.load("BillboardGLES2.vert", "BillboardGLES2.frag", "");
+		mesh.setUsage(GL_DYNAMIC_DRAW);
+		mesh.addVertices(pos);
+	#else
+		vbo.setVertexData(pos, NUM_BILLBOARDS, GL_DYNAMIC_DRAW);
+		shader.load("Billboard");
+	#endif
 	
 	ofDisableArbTex();
 	texture.loadImage("snow.png");
-	ofEnableAlphaBlending();
 }
 
 //--------------------------------------------------------------
 void testApp::update() {
-	ofVec2f mouse;
-	ofVec2f mouseVec;
-	if (!hasMouse) 
-	{
-		previousX = currentX;
-		previousY = currentY;
-		
-		currentX+=30;
-		if (currentX>ofGetWidth()) {
-			currentX = ofRandomWidth();
-		}
-		
-		currentY+=30;
-		if (currentY>ofGetHeight()) {
-			currentY = ofRandomHeight();
-		}
-		mouse.set(currentX, currentY);
-		mouseVec.set(previousX-currentX, previousY-currentY);
-	}else {
-		mouse.set(ofGetMouseX(), ofGetMouseY());
-		mouseVec.set(ofGetPreviousMouseX()-ofGetMouseX(), ofGetPreviousMouseY()-ofGetMouseY());
-	}
-
+	ofVec2f mouse(ofGetMouseX(), ofGetMouseY());
+	ofVec2f mouseVec(ofGetPreviousMouseX()-ofGetMouseX(), ofGetPreviousMouseY()-ofGetMouseY());
 	mouseVec.limit(10.0);
 	
 	for (int i=0; i<NUM_BILLBOARDS; i++) {
 		ofSeedRandom(i);
-		ofVec3f &point = mesh.getVertices()[i];
+		#ifdef TARGET_OPENGLES
+			ofVec3f &point = mesh.getVertices()[i];
+		#else
+			ofVec2f &point = pos[i];
+		#endif
+		
 		
 		if(mouse.distance(point) < ofRandom(100, 200)) {
 			vel[i] -= mouseVec; 
@@ -95,8 +79,8 @@ void testApp::update() {
 
 //--------------------------------------------------------------
 void testApp::draw() {
-	
-	//ofSetColor(255);
+	ofEnableAlphaBlending();
+	ofSetColor(255);
 	
 	ofEnablePointSprites();
 	shader.begin();
@@ -116,17 +100,22 @@ void testApp::draw() {
 	glEnableVertexAttribArray(angleLoc);
 	
 	texture.getTextureReference().bind();
-	mesh.drawVertices();
+	#ifdef TARGET_OPENGLES
+		mesh.drawVertices();
+	#else
+		vbo.updateVertexData(pos, NUM_BILLBOARDS);
+		vbo.draw(GL_POINTS, 0, NUM_BILLBOARDS);
+	#endif
+	
+
 	texture.getTextureReference().unbind();
+	
 	shader.end();
 	ofDisablePointSprites();
 	
 	// disable vertex attributes
 	glDisableVertexAttribArray(pointAttLoc); 
 	glDisableVertexAttribArray(angleLoc);
-	
-	ofDrawBitmapStringHighlight(ofToString(ofGetFrameRate()), 100, 100, ofColor::black, ofColor::yellow);
-	
 }
 
 //--------------------------------------------------------------
@@ -143,10 +132,7 @@ void testApp::keyReleased(int key){
 
 //--------------------------------------------------------------
 void testApp::mouseMoved(int x, int y ){
-	if(!hasMouse)
-	{
-		hasMouse = true;
-	}
+	
 }
 
 //--------------------------------------------------------------
