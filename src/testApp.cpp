@@ -5,11 +5,13 @@
 //--------------------------------------------------------------
 void testApp::setup() {
 	ofSetLogLevel(OF_LOG_VERBOSE);
-	
-	ofBackground(ofRandom(255));
-	ofSetVerticalSync(true);
+	ofBackground(0);
+	//ofSetVerticalSync(true);
+	hasMouse = false;
 	previousX = ofGetWidth()/2;
 	previousY = ofGetHeight()/2;
+	currentX = 0;
+	currentY = 0;
 	// billboard particles
 	for (int i=0; i<NUM_BILLBOARDS; i++) {
 		ofVec3f point;
@@ -18,7 +20,6 @@ void testApp::setup() {
 		point.x = ofRandomWidth();
 		point.y = ofRandomHeight();
 		pos.push_back(point);
-		
 		vel[i].x = ofRandomf();
 		vel[i].y = ofRandomf();
 		home[i] = pos[i];
@@ -32,27 +33,45 @@ void testApp::setup() {
 	
 	ofDisableArbTex();
 	texture.loadImage("snow.png");
+	ofEnableAlphaBlending();
 }
 
 //--------------------------------------------------------------
 void testApp::update() {
-	
-	currentX = ofRandom(ofGetWidth());
-	currentY = ofRandom(ofGetHeight());
-	ofVec2f mouse(currentX, currentY);
-	ofVec2f mouseVec(previousX-currentX, previousY-currentY);
-	
+	ofVec2f mouse;
+	ofVec2f mouseVec;
+	if (!hasMouse) 
+	{
+		previousX = currentX;
+		previousY = currentY;
+		
+		currentX+=30;
+		if (currentX>ofGetWidth()) {
+			currentX = ofRandomWidth();
+		}
+		
+		currentY+=30;
+		if (currentY>ofGetHeight()) {
+			currentY = ofRandomHeight();
+		}
+		mouse.set(currentX, currentY);
+		mouseVec.set(previousX-currentX, previousY-currentY);
+	}else {
+		mouse.set(ofGetMouseX(), ofGetMouseY());
+		mouseVec.set(ofGetPreviousMouseX()-ofGetMouseX(), ofGetPreviousMouseY()-ofGetMouseY());
+	}
+
 	mouseVec.limit(10.0);
 	
 	for (int i=0; i<NUM_BILLBOARDS; i++) {
-		//ofSeedRandom(i);
+		ofSeedRandom(i);
 		ofVec3f &point = mesh.getVertices()[i];
 		
 		if(mouse.distance(point) < ofRandom(100, 200)) {
 			vel[i] -= mouseVec; 
 		}
 		
-		mesh.getVertices()[i] += vel[i];
+		point += vel[i];
 		vel[i] *= 0.84f;
 		
 		if(point.x < 0) point.x = ofGetWidth();
@@ -77,10 +96,6 @@ void testApp::update() {
 //--------------------------------------------------------------
 void testApp::draw() {
 	
-	
-	
-	
-	ofEnableAlphaBlending();
 	//ofSetColor(255);
 	
 	ofEnablePointSprites();
@@ -90,7 +105,6 @@ void testApp::draw() {
 	// we then set the pointSizes to the vertex attritbute
 	// we then bind and then enable
 	int pointAttLoc = shader.getAttributeLocation("pointSize");
-	//mesh.drawWireframe();
 	glVertexAttribPointer(pointAttLoc, 1, GL_FLOAT, false, 0, pointSizes);
 	glBindAttribLocation(shader.getProgram(), pointAttLoc, "pointSize");
 	glEnableVertexAttribArray(pointAttLoc);
@@ -129,7 +143,10 @@ void testApp::keyReleased(int key){
 
 //--------------------------------------------------------------
 void testApp::mouseMoved(int x, int y ){
-	
+	if(!hasMouse)
+	{
+		hasMouse = true;
+	}
 }
 
 //--------------------------------------------------------------

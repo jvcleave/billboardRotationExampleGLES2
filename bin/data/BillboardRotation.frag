@@ -9,7 +9,7 @@ varying float depth;
 varying vec4 colorVarying;
 varying vec2 texCoordVarying;
 
-varying  float		rotAngle;
+varying float rotAngle;
 
 
 void main (void) {

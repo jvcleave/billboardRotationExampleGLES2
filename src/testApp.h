@@ -2,7 +2,7 @@
 #include "ofMain.h"
 #include "ofVbo.h"
 
-#define NUM_BILLBOARDS 2000
+#define NUM_BILLBOARDS 500
 
 class testApp : public ofBaseApp {
 	public:
@@ -33,7 +33,7 @@ class testApp : public ofBaseApp {
 	int previousY;
 	int currentX;
 	ofVboMesh mesh;
-	
+	bool hasMouse;
 	int currentY;
 };
 
