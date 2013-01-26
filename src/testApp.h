@@ -8,36 +8,36 @@
 #define NUM_BILLBOARDS 10000
 #endif
 
-
+#define TARGET_OPENGLES_TEST 1
 class testApp : public ofBaseApp {
-	public:
-		void setup();
-		void update();
-		void draw();
-		
-		void keyPressed(int key);
-		void keyReleased(int key);
-		void mouseMoved(int x, int y );
-		void mouseDragged(int x, int y, int button);
-		void mousePressed(int x, int y, int button);
-		void mouseReleased(int x, int y, int button);
-		void windowResized(int w, int h);
-		void dragEvent(ofDragInfo dragInfo);
-		void gotMessage(ofMessage msg);
-		
-		ofVbo vbo;
-		ofShader shader;
-		ofImage texture;
-		#ifdef TARGET_OPENGLES
-		vector<ofVec3f> pos;
-		ofVboMesh mesh;
-		#else
-		ofVec2f pos[NUM_BILLBOARDS];
-		#endif
-		ofVec2f vel[NUM_BILLBOARDS];
-		ofVec2f home[NUM_BILLBOARDS];
-		float pointSizes[NUM_BILLBOARDS];
-		float rotations[NUM_BILLBOARDS];
+public:
+	void setup();
+	void update();
+	void draw();
+	
+	void keyPressed(int key);
+	void keyReleased(int key);
+	void mouseMoved(int x, int y );
+	void mouseDragged(int x, int y, int button);
+	void mousePressed(int x, int y, int button);
+	void mouseReleased(int x, int y, int button);
+	void windowResized(int w, int h);
+	void dragEvent(ofDragInfo dragInfo);
+	void gotMessage(ofMessage msg);
+	
+	ofVbo vbo;
+	ofShader shader;
+	ofImage texture;
+#ifdef TARGET_OPENGLES_TEST
+	vector<ofVec3f> pos;
+	ofVboMesh mesh;
+#else
+	ofVec2f pos[NUM_BILLBOARDS];
+#endif
+	ofVec2f vel[NUM_BILLBOARDS];
+	ofVec2f home[NUM_BILLBOARDS];
+	float pointSizes[NUM_BILLBOARDS];
+	float rotations[NUM_BILLBOARDS];
 	
 	
 };

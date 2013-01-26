@@ -8,12 +8,12 @@ void testApp::setup() {
 	
 	// billboard particles
 	for (int i=0; i<NUM_BILLBOARDS; i++) {
-		#ifdef TARGET_OPENGLES
-			pos.push_back(ofVec3f(ofRandomWidth(), ofRandomHeight(), 0));
-		#else
-			pos[i].x = ofRandomWidth();
-			pos[i].y = ofRandomHeight();
-		#endif
+#ifdef TARGET_OPENGLES_TEST
+		pos.push_back(ofVec3f(ofRandomWidth(), ofRandomHeight(), 0));
+#else
+		pos[i].x = ofRandomWidth();
+		pos[i].y = ofRandomHeight();
+#endif
 		vel[i].x = ofRandomf();
 		vel[i].y = ofRandomf();
 		home[i] = pos[i];
@@ -23,14 +23,15 @@ void testApp::setup() {
 	
 	// set the vertex data
 	
-	#ifdef TARGET_OPENGLES
-		shader.load("BillboardGLES2.vert", "BillboardGLES2.frag", "");
-		mesh.setUsage(GL_DYNAMIC_DRAW);
-		mesh.addVertices(pos);
-	#else
-		vbo.setVertexData(pos, NUM_BILLBOARDS, GL_DYNAMIC_DRAW);
-		shader.load("Billboard");
-	#endif
+#ifdef TARGET_OPENGLES_TEST
+	//shader.load("BillboardGLES2.vert", "BillboardGLES2.frag", "");
+	shader.load("Billboard");
+	mesh.setUsage(GL_DYNAMIC_DRAW);
+	mesh.addVertices(pos);
+#else
+	vbo.setVertexData(pos, NUM_BILLBOARDS, GL_DYNAMIC_DRAW);
+	shader.load("Billboard");
+#endif
 	
 	ofDisableArbTex();
 	texture.loadImage("snow.png");
@@ -44,11 +45,11 @@ void testApp::update() {
 	
 	for (int i=0; i<NUM_BILLBOARDS; i++) {
 		ofSeedRandom(i);
-		#ifdef TARGET_OPENGLES
-			ofVec3f &point = mesh.getVertices()[i];
-		#else
-			ofVec2f &point = pos[i];
-		#endif
+#ifdef TARGET_OPENGLES_TEST
+		ofVec3f &point = mesh.getVertices()[i];
+#else
+		ofVec2f &point = pos[i];
+#endif
 		
 		
 		if(mouse.distance(point) < ofRandom(100, 200)) {
@@ -100,14 +101,14 @@ void testApp::draw() {
 	glEnableVertexAttribArray(angleLoc);
 	
 	texture.getTextureReference().bind();
-	#ifdef TARGET_OPENGLES
-		mesh.drawVertices();
-	#else
-		vbo.updateVertexData(pos, NUM_BILLBOARDS);
-		vbo.draw(GL_POINTS, 0, NUM_BILLBOARDS);
-	#endif
+#ifdef TARGET_OPENGLES_TEST
+	mesh.drawVertices();
+#else
+	vbo.updateVertexData(pos, NUM_BILLBOARDS);
+	vbo.draw(GL_POINTS, 0, NUM_BILLBOARDS);
+#endif
 	
-
+	
 	texture.getTextureReference().unbind();
 	
 	shader.end();
@@ -159,10 +160,10 @@ void testApp::windowResized(int w, int h){
 
 //--------------------------------------------------------------
 void testApp::gotMessage(ofMessage msg){
-
+	
 }
 
 //--------------------------------------------------------------
 void testApp::dragEvent(ofDragInfo dragInfo){ 
-
+	
 }
