@@ -4,7 +4,10 @@
 void testApp::setup() {
 	ofSetLogLevel(OF_LOG_VERBOSE);
 	ofBackground(0);
-	ofSetVerticalSync(true);
+	
+	#ifndef TARGET_OPENGLES
+		ofSetVerticalSync(true);
+	#endif
 	
 	// billboard particles
 	for (int i=0; i<NUM_BILLBOARDS; i++) {
@@ -21,13 +24,13 @@ void testApp::setup() {
 		rotations[i] = ofRandom(0, 360);
 	}
 	
-	// set the vertex data
-	
 	#ifdef TARGET_OPENGLES
-		shader.load("BillboardGLES2.vert", "BillboardGLES2.frag", "");
+		shader.load("BillboardGLES2");
 		mesh.setUsage(GL_DYNAMIC_DRAW);
+		// set the vertex data
 		mesh.addVertices(pos);
 	#else
+		// set the vertex data
 		vbo.setVertexData(pos, NUM_BILLBOARDS, GL_DYNAMIC_DRAW);
 		shader.load("Billboard");
 	#endif
@@ -107,7 +110,6 @@ void testApp::draw() {
 		vbo.draw(GL_POINTS, 0, NUM_BILLBOARDS);
 	#endif
 	
-
 	texture.getTextureReference().unbind();
 	
 	shader.end();
@@ -124,7 +126,11 @@ void testApp::keyPressed(int key){
 		ofToggleFullscreen();
 	}
 }
-
+void testApp::exit()
+{
+	shader.unload();
+	ofLogVerbose() << "dumping shader before we leave";
+}
 //--------------------------------------------------------------
 void testApp::keyReleased(int key){
 	
